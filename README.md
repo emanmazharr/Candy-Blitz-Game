@@ -38,10 +38,10 @@ Fonts: Fredoka One (via Google Fonts)
 
 Project Structure
 
-├── index.html      # Main entry point and game structure
+├── index.html        # Main entry point and game structure
 
-├── style.css       # Neon-themed UI and particle animations
+├── style.css         # Neon-themed UI and particle animations
 
-├── script.js       # Game logic, match detection, and gravity
+├── script.js         # Game logic, match detection, and gravity
 
-└── README.md       # Project documentation
+└── README.md         # Project documentation
