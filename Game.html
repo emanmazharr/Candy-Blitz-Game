@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candy Blitz - Premium Ultra (Working)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        /* ----- GLOBAL STYLES & IMPRESSIVE BACKGROUND ----- */
+        body {
+            margin: 0;
+            font-family: 'Fredoka One', cursive;
+            background: radial-gradient(circle at center, #0a0117, #000000);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            color: white;
+        }
+
+        /* Background Image Overlay */
+        body::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff4da6, #4da6ff, #4dffb5, #ffd700);
+            opacity: 0.15;
+            filter: brightness(1.5) blur(3px);
+            z-index: 0;
+        }
+
+        /* ----- Floating Sparkles (Enhanced) ----- */
+        .sparkle {
+            position: absolute;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 10px #ffcc00, 0 0 5px #ff4da6;
+            opacity: 0.8;
+            pointer-events: none;
+            animation: float 15s linear infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0) rotate(0deg) scale(1);}
+            50% { transform: translateY(0) translateX(50px) rotate(180deg) scale(0.8);}
+            100% { transform: translateY(-100vh) translateX(0) rotate(360deg) scale(1);}
+        }
+
+        /* ----- UI Panels (Menu, Scoreboard, Game Over) ----- */
+        .ui-panel {
+            background: rgba(30, 0, 50, 0.85);
+            border: 3px solid #ff4da6;
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 0 30px #4dffb5;
+            padding: 30px;
+            z-index: 10;
+        }
+
+        /* ----- Menu (Refined) ----- */
+        #menu {
+            position: absolute;
+            top:50%;
+            left:50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 20;
+        }
+        #menu h1 {
+            font-size: 80px;
+            color: #ffd700;
+            text-shadow: 0 0 15px #ff4da6, 0 0 40px #ff4da6;
+            animation: glow 1.5s ease-in-out infinite alternate;
+            margin-bottom: 20px;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 15px #ff4da6, 0 0 40px #ffd700; }
+            to { text-shadow: 0 0 25px #ffd700, 0 0 60px #ff4da6; }
+        }
+        #menu button {
+            margin: 15px;
+            padding: 16px 40px;
+            font-size: 24px;
+            background: linear-gradient(45deg, #ff4da6, #4da6ff);
+            border: 3px solid #fff;
+            border-radius: 12px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 25px rgba(255, 77, 166, 0.8);
+            display: block;
+            width: 250px;
+        }
+        #menu button:hover {
+            transform: scale(1.15) rotate(-1deg);
+            box-shadow: 0 0 40px #ffd700, 0 0 20px #ff4da6;
+            background: linear-gradient(45deg, #4da6ff, #ff4da6);
+        }
+
+        /* ----- Scoreboard ----- */
+        .scoreBoard {
+            display: none;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(30, 0, 50, 0.85);
+            padding: 15px 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+            border: 2px solid #4dffb5;
+            text-align: center;
+            z-index: 5;
+            color: #fff;
+            text-shadow: 0 0 5px #000;
+            box-shadow: 0 0 15px #4dffb5;
+        }
+        #timer {
+            margin-top: 5px;
+            font-size: 1.2em;
+            color: #4dffb5;
+            font-weight: bold;
+        }
+
+        /* ----- Grid ----- */
+        #grid {
+            display: none;
+            width: 580px;
+            height: 580px;
+            flex-wrap: wrap;
+            gap: 5px;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 25px;
+            box-shadow: 0 0 0 5px #4da6ff, 0 0 40px #ff4da6;
+            animation: gridPulse 4s ease infinite;
+            z-index: 1;
+        }
+        @keyframes gridPulse {
+            0% { box-shadow: 0 0 0 5px #4da6ff, 0 0 40px #ff4da6; }
+            50% { box-shadow: 0 0 0 5px #ff4da6, 0 0 50px #4dffb5; }
+            100% { box-shadow: 0 0 0 5px #4da6ff, 0 0 40px #ff4da6; }
+        }
+
+        .tile {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            background: #ffffff11;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 8px rgba(255,255,255,0.5);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size: 40px;
+        }
+        .tile:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 0 30px #fff, 0 10px 20px rgba(0,0,0,0.6);
+        }
+        .tile:active, .tile.dragging {
+            cursor: grabbing;
+            transform: scale(1.2) rotate(5deg);
+            opacity: 0.9;
+            z-index: 5;
+            box-shadow: 0 0 50px #ffcc00, 0 0 10px #fff;
+        }
+
+        /* ----- Game Over Screen ----- */
+        #gameOver {
+            display: none;
+            position: absolute;
+            top:50%;
+            left:50%;
+            transform: translate(-50%, -50%);
+            text-align:center;
+            z-index: 10;
+        }
+        #gameOver h2{
+            font-size: 70px;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ff4da6, 0 0 60px #ffd700;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        #gameOver button {
+            margin-top: 15px;
+            padding: 16px 40px;
+            font-size: 24px;
+            background: linear-gradient(45deg, #ff4da6, #4da6ff);
+            border: 3px solid #fff;
+            border-radius: 12px;
+            cursor:pointer;
+            color:white;
+            box-shadow: 0 0 25px rgba(255, 77, 166, 0.8);
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        #gameOver button:hover{
+            transform: scale(1.15) translateY(-3px);
+            box-shadow: 0 0 40px #ffd700, 0 0 20px #ff4da6;
+            background: linear-gradient(45deg, #4da6ff, #ff4da6);
+        }
+
+        /* Particle burst on match (Enhanced) */
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: burst 0.4s ease-out forwards;
+            z-index: 20;
+        }
+        @keyframes burst {
+            to { transform: translate(var(--dx), var(--dy)); opacity:0; }
+        }
+
+        /* Mode Selection */
+        .mode-selector {
+            margin-top: 20px;
+        }
+        .mode-btn {
+            display: block;
+            margin: 10px auto;
+            padding: 12px 30px;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #4dffb5;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 200px;
+        }
+        .mode-btn:hover {
+            background: rgba(77, 255, 181, 0.2);
+            transform: scale(1.05);
+        }
+        .mode-btn.active {
+            background: rgba(77, 255, 181, 0.4);
+            box-shadow: 0 0 15px #4dffb5;
+        }
+    </style>
+</head>
+<body>
+    <div id="menu" class="ui-panel">
+        <h1>Candy Blitz</h1>
+        <div class="mode-selector">
+            <button class="mode-btn" onclick="selectMode('endless')">Endless Mode</button>
+            <button class="mode-btn" onclick="selectMode('timed')">Timed Mode</button>
+        </div>
+        <button id="startBtn" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div class="scoreBoard">
+        <h3>Score: <span id="score">0</span></h3>
+        <h3>High Score: <span id="highScore">0</span></h3>
+        <div id="timer"></div>
+    </div>
+
+    <div id="grid"></div>
+
+    <div id="gameOver" class="ui-panel">
+        <h2>Game Over!</h2>
+        <p id="finalScore">Your score: 0</p>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const grid = document.getElementById("grid");
+            const scoreDisplay = document.getElementById("score");
+            const highDisplay = document.getElementById("highScore");
+            const timerDisplay = document.getElementById("timer");
+            const menu = document.getElementById("menu");
+            const scoreBoard = document.querySelector(".scoreBoard");
+            const gameOverUI = document.getElementById("gameOver");
+            const finalScoreDisplay = document.getElementById("finalScore");
+            const startBtn = document.getElementById("startBtn");
+            const modeBtns = document.querySelectorAll('.mode-btn');
+
+            const width = 8;
+            let tiles = [], score = 0;
+            let highScore = localStorage.getItem("highScore") || 0;
+            highDisplay.innerText = highScore;
+            let gameMode = null, timeLeft = 0, timerInterval;
+            const candyEmojis = ["🍒", "🍋", "🍇", "🍉", "🍬", "🍪", "🍭", "🍫"];
+
+            let draggedId, replacedId;
+            let isProcessing = false;
+
+            // Select game mode
+            window.selectMode = function(mode) {
+                gameMode = mode;
+                modeBtns.forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                startBtn.disabled = false;
+                startBtn.style.opacity = "1";
+            }
+
+            // Particle Burst Logic
+            function createParticleBurst(sourceTile) {
+                const rect = sourceTile.getBoundingClientRect();
+                const center = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+
+                for (let i = 0; i < 10; i++) {
+                    const particle = document.createElement("div");
+                    particle.classList.add("particle");
+                    
+                    const randomColor = `hsl(${Math.random() * 360}, 100%, 70%)`;
+                    particle.style.background = randomColor;
+
+                    particle.style.left = `${center.x}px`;
+                    particle.style.top = `${center.y}px`;
+
+                    const angle = Math.random() * 2 * Math.PI;
+                    const distance = 20 + Math.random() * 30;
+
+                    particle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+                    particle.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+
+                    document.body.appendChild(particle);
+                    setTimeout(() => particle.remove(), 400);
+                }
+            }
+
+            function createBoard() {
+                grid.innerHTML = "";
+                tiles = [];
+                for (let i = 0; i < width * width; i++) {
+                    const tile = document.createElement("div");
+                    tile.classList.add("tile");
+                    tile.setAttribute("draggable", true);
+                    tile.setAttribute("id", i);
+                    tile.textContent = candyEmojis[Math.floor(Math.random() * candyEmojis.length)];
+                    grid.appendChild(tile);
+                    tiles.push(tile);
+                }
+                
+                // Add event listeners to tiles
+                tiles.forEach(tile => {
+                    tile.addEventListener("dragstart", dragStart);
+                    tile.addEventListener("dragover", dragOver);
+                    tile.addEventListener("drop", dragDrop);
+                    tile.addEventListener("dragend", dragEnd);
+                    // Touch events
+                    tile.addEventListener("touchstart", touchStart, {passive: true});
+                    tile.addEventListener("touchend", touchEnd, {passive: true});
+                });
+                
+                // Check the initial board for matches immediately
+                // and clear them, filling the board until it's stable.
+                let stable = false;
+                while (!stable) {
+                    stable = checkMatches(true); // Pass true to checkMatches to force stability
+                }
+            }
+
+            function dragStart() { 
+                if (isProcessing) return;
+                draggedId = parseInt(this.id); 
+                this.classList.add('dragging'); 
+            } 
+            
+            function dragOver(e) { 
+                e.preventDefault(); 
+            }
+            
+            function dragDrop(e) { 
+                e.preventDefault();
+                if (isProcessing) return;
+                
+                replacedId = parseInt(this.id); 
+                
+                // Check if the move is valid (adjacent tiles)
+                if (!isValidMove(draggedId, replacedId)) {
+                    return;
+                }
+                
+                // Swap the candies
+                swapTiles(draggedId, replacedId);
+                
+                // Check for matches after the swap
+                checkMatches();
+            } 
+            
+            function dragEnd() { 
+                this.classList.remove('dragging'); 
+            } 
+
+            function touchStart(e) { 
+                if (isProcessing) return;
+                draggedId = parseInt(e.target.id); 
+                e.target.classList.add('dragging'); 
+            }
+            
+            function touchEnd(e) { 
+                if (isProcessing) return;
+                
+                const touch = e.changedTouches[0];
+                const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                
+                if (element && element.classList.contains('tile')) {
+                    replacedId = parseInt(element.id); 
+                    
+                    // Check if the move is valid (adjacent tiles)
+                    if (!isValidMove(draggedId, replacedId)) {
+                        tiles[draggedId].classList.remove('dragging');
+                        return;
+                    }
+                    
+                    // Swap the candies
+                    swapTiles(draggedId, replacedId);
+                    
+                    // Check for matches after the swap
+                    checkMatches();
+                }
+                
+                // Remove dragging class
+                tiles[draggedId].classList.remove('dragging');
+            }
+
+            function swapTiles(id1, id2) {
+                const temp = tiles[id1].textContent;
+                tiles[id1].textContent = tiles[id2].textContent;
+                tiles[id2].textContent = temp;
+            }
+
+            // Check if the move is valid (only adjacent tiles can be swapped)
+            function isValidMove(id1, id2) {
+                const row1 = Math.floor(id1 / width);
+                const col1 = id1 % width;
+                const row2 = Math.floor(id2 / width);
+                const col2 = id2 % width;
+                
+                // Check if tiles are adjacent (horizontally or vertically)
+                const isAdjacent = (
+                    (Math.abs(row1 - row2) === 1 && col1 === col2) || 
+                    (Math.abs(col1 - col2) === 1 && row1 === row2)
+                );
+                
+                return isAdjacent;
+            }
+
+            function checkMatches(initialCheck = false) {
+                if (isProcessing && !initialCheck) return false;
+                
+                let matchFound = false;
+                const matchedIndices = new Set();
+                
+                // Loop through the entire board to find matches
+                for (let i = 0; i < width * width; i++) {
+                    // Skip if this tile is already matched
+                    if (matchedIndices.has(i)) continue;
+                    
+                    const val = tiles[i].textContent;
+                    if (val === "") continue;
+                    
+                    // Check horizontal matches
+                    let horizontalMatches = [i];
+                    let j = i + 1;
+                    while (j < width * width && Math.floor(j / width) === Math.floor(i / width) && 
+                           tiles[j].textContent === val) {
+                        horizontalMatches.push(j);
+                        j++;
+                    }
+                    
+                    // Check vertical matches
+                    let verticalMatches = [i];
+                    j = i + width;
+                    while (j < width * width && tiles[j].textContent === val) {
+                        verticalMatches.push(j);
+                        j += width;
+                    }
+                    
+                    // Process matches (only if we have 3 or more in a row)
+                    if (horizontalMatches.length >= 3) {
+                        horizontalMatches.forEach(idx => {
+                            matchedIndices.add(idx);
+                            if (!initialCheck) {
+                                createParticleBurst(tiles[idx]);
+                            }
+                            tiles[idx].textContent = "";
+                        });
+                        if (!initialCheck) {
+                            score += horizontalMatches.length * 10;
+                            scoreDisplay.innerText = score;
+                        }
+                        matchFound = true;
+                    }
+                    
+                    if (verticalMatches.length >= 3) {
+                        verticalMatches.forEach(idx => {
+                            matchedIndices.add(idx);
+                            if (!initialCheck) {
+                                createParticleBurst(tiles[idx]);
+                            }
+                            tiles[idx].textContent = "";
+                        });
+                        if (!initialCheck) {
+                            score += verticalMatches.length * 10;
+                            scoreDisplay.innerText = score;
+                        }
+                        matchFound = true;
+                    }
+                }
+                
+                if (matchFound && !initialCheck) {
+                    isProcessing = true;
+                    // Move candies down and refill
+                    setTimeout(() => {
+                        moveDown();
+                        // Check for new matches after filling
+                        setTimeout(() => {
+                            isProcessing = false;
+                            checkMatches();
+                        }, 300);
+                    }, 300);
+                }
+                
+                return !matchFound;
+            }
+
+            // MoveDown and refill logic
+            function moveDown() {
+                // Move candies down to fill empty spaces
+                for (let col = 0; col < width; col++) {
+                    let emptySpaces = 0;
+                    
+                    // Count empty spaces from bottom to top
+                    for (let row = width - 1; row >= 0; row--) {
+                        const index = row * width + col;
+                        if (tiles[index].textContent === "") {
+                            emptySpaces++;
+                        } else if (emptySpaces > 0) {
+                            // Move candy down
+                            const newIndex = (row + emptySpaces) * width + col;
+                            tiles[newIndex].textContent = tiles[index].textContent;
+                            tiles[index].textContent = "";
+                        }
+                    }
+                    
+                    // Fill empty spaces at the top with new candies
+                    for (let row = 0; row < emptySpaces; row++) {
+                        const index = row * width + col;
+                        tiles[index].textContent = candyEmojis[Math.floor(Math.random() * candyEmojis.length)];
+                    }
+                }
+            }
+            
+            window.startGame = function() {
+                if (!gameMode) {
+                    alert("Please select a game mode first!");
+                    return;
+                }
+                
+                // Display elements
+                menu.style.display = "none";
+                grid.style.display = "flex";
+                scoreBoard.style.display = "block";
+                
+                score = 0;
+                scoreDisplay.innerText = score;
+                createBoard(); // This now ensures the board is stable before showing it.
+                
+                // Clear any old intervals
+                if (timerInterval) clearInterval(timerInterval);
+                
+                // Only start timer logic if in timed mode
+                if (gameMode === "timed") {
+                    timeLeft = 60; // 1 minute for timed mode
+                    updateTimer();
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        updateTimer();
+                        if (timeLeft <= 0) endGame();
+                    }, 1000);
+                } else {
+                    timerDisplay.innerText = "Endless";
+                }
+            }
+
+            function updateTimer() {
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                timerDisplay.innerText = `Time: ${mins}:${secs.toString().padStart(2, '0')}`;
+                if (timeLeft <= 10) {
+                    timerDisplay.style.color = '#ff4da6';
+                    timerDisplay.style.animation = 'glow 0.5s ease-in-out infinite alternate';
+                } else {
+                    timerDisplay.style.color = '#4dffb5';
+                    timerDisplay.style.animation = 'none';
+                }
+            }
+
+            function endGame() {
+                if (timerInterval) clearInterval(timerInterval);
+                tiles.forEach(tile => tile.setAttribute("draggable", false));
+                
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem("highScore", score);
+                    highDisplay.innerText = highScore;
+                }
+                
+                finalScoreDisplay.textContent = `Your score: ${score}`;
+                gameOverUI.style.display = "block";
+            }
+
+            window.restartGame = function() {
+                gameOverUI.style.display = "none";
+                menu.style.display = "flex";
+                grid.style.display = "none";
+                scoreBoard.style.display = "none";
+                modeBtns.forEach(btn => btn.classList.remove('active'));
+                startBtn.disabled = true;
+                startBtn.style.opacity = "0.5";
+                gameMode = null;
+            }
+
+            // Initialize start button as disabled
+            startBtn.disabled = true;
+            startBtn.style.opacity = "0.5";
+
+            // Floating sparkles
+            for (let i = 0; i < 35; i++) {
+                let s = document.createElement("div");
+                s.classList.add("sparkle");
+                s.style.left = Math.random() * 100 + "%";
+                s.style.top = Math.random() * 100 + "%";
+                s.style.width = (5 + Math.random() * 10) + "px";
+                s.style.height = s.style.width;
+                s.style.animationDuration = (8 + Math.random() * 10) + "s";
+                s.style.animationDelay = (-Math.random() * 10) + "s";
+                document.body.appendChild(s);
+            }
+        });
+    </script>
+</body>
+</html> 
